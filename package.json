@@ -1,15 +1,30 @@
 {
   "name": "counterwidget",
   "version": "1.0.0",
-  "description": "",
+  "description": "Small desktop counter widget with persistent history.",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "build": "electron-builder --win portable"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
+  "build": {
+    "appId": "com.local.counterwidget",
+    "productName": "Counter Widget",
+    "files": [
+      "index.html",
+      "main.js",
+      "renderer.js",
+      "style.css",
+      "package.json"
+    ],
+    "win": {
+      "target": "portable"
+    }
+  },
   "devDependencies": {
     "electron": "^42.5.1",
     "electron-builder": "^26.15.3"

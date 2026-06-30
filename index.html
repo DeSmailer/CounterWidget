@@ -2,28 +2,83 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8" />
-    <title>Counter Widget</title>
+    <title>Виджет счетчика</title>
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-<div class="widget">
-    <div class="drag-area">
-        <div class="percent" id="percent">0%</div>
+<div class="widget" id="widget">
+    <div class="compact">
+        <div class="drag-area">
+            <button class="tool-button" id="historyOpen" title="История">Журнал</button>
+            <div class="percent" id="percent">0%</div>
+            <div class="drag-spacer"></div>
+        </div>
+
+        <div class="row green">
+            <button id="greenMinus" title="Удалить последнюю зеленую запись">-</button>
+            <div class="value" id="greenValue">0</div>
+            <button id="greenPlus">+</button>
+        </div>
+
+        <div class="row red">
+            <button id="redMinus" title="Удалить последнюю красную запись">-</button>
+            <div class="value" id="redValue">0</div>
+            <button id="redPlus">+</button>
+        </div>
+
+        <button class="reset" id="reset">Сброс</button>
     </div>
 
-    <div class="row green">
-        <button id="greenMinus">-</button>
-        <div class="value" id="greenValue">0</div>
-        <button id="greenPlus">+</button>
-    </div>
+    <section class="history-panel" id="historyPanel" hidden>
+        <div class="history-header">
+            <div class="history-title">Журнал счетчика</div>
+            <button class="icon-button" id="historyClose" title="Закрыть">x</button>
+        </div>
 
-    <div class="row red">
-        <button id="redMinus">-</button>
-        <div class="value" id="redValue">0</div>
-        <button id="redPlus">+</button>
-    </div>
+        <div class="history-controls">
+            <select id="filterMode">
+                <option value="today">Сегодня</option>
+                <option value="yesterday">Вчера</option>
+                <option value="day">Конкретный день</option>
+                <option value="range">Период</option>
+                <option value="all">Все время</option>
+            </select>
+            <input id="singleDate" type="date" title="Выбрать день" />
+            <input id="rangeStart" type="date" title="Дата начала" />
+            <input id="rangeEnd" type="date" title="Дата окончания" />
+        </div>
 
-    <button class="reset" id="reset">Reset</button>
+        <div class="history-summary">
+            <div>
+                <span class="summary-label">Зеленый</span>
+                <strong class="green-text" id="summaryGreen">0</strong>
+            </div>
+            <div>
+                <span class="summary-label">Красный</span>
+                <strong class="red-text" id="summaryRed">0</strong>
+            </div>
+            <div>
+                <span class="summary-label">% зеленого</span>
+                <strong id="summaryPercent">0%</strong>
+            </div>
+        </div>
+
+        <div class="chart-panel">
+            <div class="chart-header">
+                <span>График по дням</span>
+                <div class="chart-legend">
+                    <span><i class="legend-dot green-dot"></i>Зеленый</span>
+                    <span><i class="legend-dot red-dot"></i>Красный</span>
+                    <span><i class="legend-line"></i>%</span>
+                </div>
+                <button class="chart-toggle" id="chartToggle">Скрыть</button>
+            </div>
+            <canvas id="historyChart" width="520" height="160"></canvas>
+        </div>
+
+        <div class="day-list" id="dayList"></div>
+        <div class="entry-list" id="entryList"></div>
+    </section>
 </div>
 
 <script src="renderer.js"></script>
