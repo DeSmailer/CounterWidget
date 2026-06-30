@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <title>Counter Widget</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="widget">
+    <div class="drag-area">
+        <div class="percent" id="percent">0%</div>
+    </div>
+
+    <div class="row green">
+        <button id="greenMinus">-</button>
+        <div class="value" id="greenValue">0</div>
+        <button id="greenPlus">+</button>
+    </div>
+
+    <div class="row red">
+        <button id="redMinus">-</button>
+        <div class="value" id="redValue">0</div>
+        <button id="redPlus">+</button>
+    </div>
+
+    <button class="reset" id="reset">Reset</button>
+</div>
+
+<script src="renderer.js"></script>
+</body>
+</html>
