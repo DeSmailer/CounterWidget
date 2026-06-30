@@ -21,6 +21,9 @@ const entryList = document.getElementById('entryList');
 const historyChart = document.getElementById('historyChart');
 const chartContext = historyChart.getContext('2d');
 const chartToggle = document.getElementById('chartToggle');
+const exportDataButton = document.getElementById('exportData');
+const importDataButton = document.getElementById('importData');
+const historyStatus = document.getElementById('historyStatus');
 
 let state = loadState();
 let green = 0;
@@ -47,21 +50,57 @@ function loadState() {
 function normalizeEntries(entries) {
     return entries
         .filter((entry) => entry && (entry.type === 'reset' || entry.type === 'adjust'))
+        .filter((entry) => entry.occurredAt && !Number.isNaN(new Date(entry.occurredAt).getTime()))
         .filter((entry) => entry.type === 'reset' || entry.delta > 0)
         .map((entry) => {
             if (entry.type === 'reset') {
-                return entry;
+                return {
+                    id: entry.id || createId(),
+                    type: 'reset',
+                    occurredAt: new Date(entry.occurredAt).toISOString()
+                };
             }
 
             return {
-                ...entry,
-                delta: Math.max(1, Math.floor(Number(entry.delta)))
+                id: entry.id || createId(),
+                type: 'adjust',
+                counter: entry.counter === 'red' ? 'red' : 'green',
+                delta: Math.max(1, Math.floor(Number(entry.delta))),
+                occurredAt: new Date(entry.occurredAt).toISOString()
             };
         });
 }
 
 function saveState() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function exportPayload() {
+    return {
+        app: 'Counter Widget',
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        state
+    };
+}
+
+function stateFromImport(data) {
+    const importedState = data && Array.isArray(data.entries) ? data : data?.state;
+
+    if (!importedState || !Array.isArray(importedState.entries)) {
+        throw new Error('Файл не похож на сохранение счетчика.');
+    }
+
+    return {
+        entries: normalizeEntries(importedState.entries),
+        chartOpen: importedState.chartOpen !== false
+    };
+}
+
+function showHistoryStatus(message, isError = false) {
+    historyStatus.hidden = false;
+    historyStatus.textContent = message;
+    historyStatus.classList.toggle('error', isError);
 }
 
 function createId() {
@@ -554,6 +593,33 @@ chartToggle.addEventListener('click', () => {
     state.chartOpen = !state.chartOpen;
     saveState();
     renderHistory();
+});
+exportDataButton.addEventListener('click', async () => {
+    try {
+        const result = await ipcRenderer.invoke('export-save-data', exportPayload());
+
+        if (!result.canceled) {
+            showHistoryStatus('Данные выгружены в файл.');
+        }
+    } catch (error) {
+        showHistoryStatus(`Не удалось выгрузить данные: ${error.message}`, true);
+    }
+});
+importDataButton.addEventListener('click', async () => {
+    try {
+        const result = await ipcRenderer.invoke('import-save-data');
+
+        if (result.canceled) {
+            return;
+        }
+
+        state = stateFromImport(result.data);
+        editingEntryId = null;
+        refreshAll();
+        showHistoryStatus('Данные загружены из файла.');
+    } catch (error) {
+        showHistoryStatus(`Не удалось загрузить данные: ${error.message}`, true);
+    }
 });
 
 filterMode.addEventListener('change', () => {
